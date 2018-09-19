@@ -1,0 +1,7 @@
+[package]
+name = "pugrs"
+version = "0.1.0"
+authors = ["misebox <misebox@gmail.com>"]
+
+[dependencies]
+regex = "1"
