@@ -5,3 +5,4 @@ authors = ["misebox <misebox@gmail.com>"]
 
 [dependencies]
 regex = "1"
+lazy_static = "1.1.0"
