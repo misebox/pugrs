@@ -1,5 +1,6 @@
 use std::fmt;
 
+#[derive(Clone)]
 pub enum TokenType {
     NewLine,
     Tag(String),
@@ -8,8 +9,8 @@ pub enum TokenType {
     Attr(String, String),
     Text(String),
     Colon,
-    Indent(usize),
-    Outdent(usize),
+    Indent,
+    Outdent,
     Slash,
 }
 impl fmt::Display for TokenType {
@@ -22,19 +23,24 @@ impl fmt::Display for TokenType {
             TokenType::Attr(name, value) => write!(f, "Attr({}, {})", name, value),
             TokenType::Text(body) => write!(f, "Text({})", body),
             TokenType::Colon => write!(f, "Colon"),
-            TokenType::Indent(level) => write!(f, "Indent({})", level),
-            TokenType::Outdent(level) => write!(f, "Outdent({})", level),
+            TokenType::Indent => write!(f, "Indent"),
+            TokenType::Outdent => write!(f, "Outdent"),
             TokenType::Slash => write!(f, "Slash"),
         }
     }
 }
 
+#[derive(Clone)]
 pub struct Token {
     ty: TokenType,
     start: usize,
     end: usize,
 }
-
+impl Token {
+    pub fn get_type(&self) -> &TokenType {
+        &self.ty
+    }
+}
 impl fmt::Debug for Token {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "<{}: {}..{}>", self.ty, self.start, self.end)
@@ -70,8 +76,8 @@ impl Lexer {
         printable
     }
 
-    pub fn get_tokens(&self) -> &Vec<Token> {
-        &self.tokens
+    pub fn get_tokens(&self) -> Vec<Token> {
+        self.tokens.clone()
     }
     fn add_token(&mut self, ty: TokenType, start: usize, length: usize) {
         println!("<{}: {}..{}>", &ty, &start, &length);
@@ -134,14 +140,6 @@ impl Lexer {
                 }
                 Some(&c) => c,
             };
-            match &ch {
-                c if c.is_ascii_control() => {
-                    print!("- [{}] ", &ch.escape_unicode());
-                }
-                c => {
-                    print!("- [{}] ", c);
-                }
-            }
             match ch {
                 s if s.is_ascii_alphabetic() => {
                     // Found Tag
@@ -163,15 +161,24 @@ impl Lexer {
                         Some(s) => s.len(),
                         None => 0,
                     };
-                    let prev = indents[indents.len() - 1];
+                    let prev = if indents.len() > 0 {
+                        indents[indents.len() - 1]
+                    } else {
+                        0
+                    };
                     if level > prev {
                         // Found indent
-                        self.add_token(TokenType::Indent(level), start, level);
+                        self.add_token(TokenType::Indent, start, level);
                         indents.push(level);
                     } else if level < prev {
                         // Found outdent
-                        self.add_token(TokenType::Outdent(level), start, level);
-                        indents.pop();
+                        let mut sz = prev;
+                        while level < sz && indents.len() > 0 {
+                            println!("Outdent! actual level={}, indent level={}", &level, &sz);
+                            indents.pop();
+                            sz = indents[indents.len() - 1];
+                            self.add_token(TokenType::Outdent, sz, sz - level);
+                        }
                     }
                     continue;
                 }

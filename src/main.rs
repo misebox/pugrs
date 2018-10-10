@@ -2,6 +2,7 @@ extern crate lazy_static;
 extern crate regex;
 mod input;
 mod lex;
+mod parse;
 mod try;
 
 fn main() {
@@ -21,7 +22,9 @@ fn main() {
     lexer.tokenize();
     let tokens = lexer.get_tokens();
     println!("Getting tokens done!");
-    for token in tokens {
-        println!("{:?}, {}", token, lexer.token_source(token));
-    }
+    // for token in tokens {
+    //     println!("{:?}, {}", token, lexer.token_source(token));
+    // }
+    let mut parser = parse::Parser::new(tokens);
+    let nodes = parser.parse();
 }
