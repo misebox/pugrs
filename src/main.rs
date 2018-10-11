@@ -3,6 +3,7 @@ extern crate regex;
 mod input;
 mod lex;
 mod parse;
+mod render;
 mod try;
 
 fn main() {
@@ -27,4 +28,7 @@ fn main() {
     // }
     let mut parser = parse::Parser::new(tokens);
     let nodes = parser.parse();
+    println!("-------------- generate HTML! ---------------");
+    let html = render::render(nodes);
+    println!("{}", html);
 }

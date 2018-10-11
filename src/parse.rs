@@ -27,6 +27,50 @@ impl HTMLElement {
     fn push_child(&mut self, child: Node) {
         self.children.push(child);
     }
+    pub fn render(&self, indent: usize) -> String {
+        let mut html = "".to_string();
+        html.push_str(&" ".repeat(indent));
+        html.push('<');
+        html.push_str(&self.name);
+        for (name, value) in &self.attrs {
+            html.push(' ');
+            // TODO HTML ESCAPE
+            html.push_str(&name);
+            html.push_str(r#"=""#);
+            // TODO HTML ESCAPE
+            html.push_str(&value);
+            html.push('"');
+        }
+        html.push_str(">\n");
+        match &self.name[0..] {
+            "area" | "base" | "br" | "col" | "embed" | "hr" | "img" | "input" | "link" | "meta"
+            | "param" | "source" | "track" | "wbr" => {
+                // No need close tag
+            }
+            _ => {
+                for child in &self.children {
+                    let str = match child {
+                        Node::Element(e) => {
+                            html.push_str(&e.render(indent + 2)[0..]);
+                        }
+                        Node::Text(body) => {
+                            html.push_str(&" ".repeat(indent));
+                            html.push_str(&body[0..]);
+                            html.push('\n');
+                        }
+                        _ => continue,
+                    };
+                }
+
+                // Close tag
+                html.push_str(&" ".repeat(indent));
+                html.push_str("</");
+                html.push_str(&self.name);
+                html.push_str(">\n");
+            }
+        }
+        html
+    }
 }
 
 pub struct Parser {
