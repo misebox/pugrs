@@ -1,4 +1,4 @@
-use parse::{HTMLElement, Node};
+use parse::Node;
 
 pub fn render(nodes: Vec<Node>) -> String {
     let mut output = "".to_string();

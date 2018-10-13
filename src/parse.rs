@@ -10,7 +10,7 @@ pub enum Node {
 pub struct HTMLElement {
     name: String,
     attrs: Vec<(String, String)>,
-    children: Vec<(Node)>,
+    children: Vec<Node>,
 }
 
 impl HTMLElement {
@@ -55,7 +55,7 @@ impl HTMLElement {
             }
             _ => {
                 for child in &self.children {
-                    let str = match child {
+                    match child {
                         Node::Element(e) => {
                             html.push_str(&e.render(indent + 1)[0..]);
                         }
@@ -160,7 +160,7 @@ impl Parser {
                         self.next();
                         self.nest += 1;
                         eprintln!("start parse child {}", self.nest);
-                        element.children.extend(vec![self.parse_one()]);
+                        element.push_child(self.parse_one());
                         eprintln!("end parse child {}", self.nest);
                         self.nest -= 1;
                     }

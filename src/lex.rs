@@ -68,6 +68,7 @@ impl Lexer {
         }
     }
 
+    #[allow(dead_code)]
     pub fn token_source(&self, token: &Token) -> String {
         let mut printable = self.src[token.start..token.end].to_string();
         for (from, to) in &[("\t", "<Tab>"), ("\n", "<LF>")] {
