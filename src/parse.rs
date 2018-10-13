@@ -101,10 +101,10 @@ impl Parser {
         if self.tokens.len() > self.index {
             let token = self.tokens[self.index].clone();
             self.index += 1;
-            println!("{}- {:?}, ", " ".repeat(self.nest), &token);
+            eprintln!("{}- {:?}, ", " ".repeat(self.nest), &token);
             Some(token)
         } else {
-            println!("end of tokens");
+            eprintln!("end of tokens");
             None
         }
     }
@@ -145,17 +145,17 @@ impl Parser {
                     TokenType::Indent => {
                         self.next();
                         self.nest += 1;
-                        println!("start parse children {}", self.nest);
+                        eprintln!("start parse children {}", self.nest);
                         element.children.extend(self.parse());
-                        println!("end parse children {}", self.nest);
+                        eprintln!("end parse children {}", self.nest);
                         self.nest -= 1;
                     }
                     TokenType::Colon => {
                         self.next();
                         self.nest += 1;
-                        println!("start parse child {}", self.nest);
+                        eprintln!("start parse child {}", self.nest);
                         element.children.extend(vec![self.parse_one()]);
-                        println!("end parse child {}", self.nest);
+                        eprintln!("end parse child {}", self.nest);
                         self.nest -= 1;
                     }
                     TokenType::Outdent | TokenType::Slash => {
@@ -188,7 +188,7 @@ impl Parser {
                     Node::Element(Box::new(element))
                 }
                 tt => {
-                    println!("Parse Error {}", tt);
+                    eprintln!("Parse Error {}", tt);
                     return Node::Empty;
                 }
             },

@@ -80,7 +80,7 @@ impl Lexer {
         self.tokens.clone()
     }
     fn add_token(&mut self, ty: TokenType, start: usize, length: usize) {
-        println!("<{}: {}..{}>", &ty, &start, &length);
+        eprintln!("<{}: {}..{}>", &ty, &start, &length);
         self.tokens.push(Token {
             ty: ty,
             start: start,
@@ -135,7 +135,7 @@ impl Lexer {
         'outer: loop {
             let ch = match c_iter.peek() {
                 None => {
-                    println!("end of file");
+                    eprintln!("end of file");
                     break;
                 }
                 Some(&c) => c,
@@ -174,7 +174,7 @@ impl Lexer {
                         // Found outdent
                         let mut sz = prev;
                         while level < sz && indents.len() > 0 {
-                            println!("Outdent! actual level={}, indent level={}", &level, &sz);
+                            eprintln!("Outdent! actual level={}, indent level={}", &level, &sz);
                             indents.pop();
                             sz = indents[indents.len() - 1];
                             self.add_token(TokenType::Outdent, sz, sz - level);
@@ -224,7 +224,7 @@ impl Lexer {
                     self.consume_next(&mut c_iter);
                     loop {
                         if !c_iter.peek().is_some() {
-                            println!("Closing parenthesis not found");
+                            eprintln!("Closing parenthesis not found");
                             break 'outer;
                         }
                         match *c_iter.peek().unwrap() {
@@ -256,7 +256,7 @@ impl Lexer {
                                                 match self.consume_quoted(&mut c_iter) {
                                                     Some(body) => body,
                                                     None => {
-                                                        println!("Error: closing quote not found");
+                                                        eprintln!("Error: closing quote not found");
                                                         break;
                                                     }
                                                 }
@@ -299,7 +299,7 @@ impl Lexer {
                     self.consume_while(&mut c_iter, Box::new(|c| -> bool { c == ' ' }));
                 }
                 s => {
-                    println!("# Found an unexpected char: [{}]", s);
+                    eprintln!("# Found an unexpected char: [{}]", s);
                     break;
                 }
             };

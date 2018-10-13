@@ -15,18 +15,17 @@ fn main() {
     let filename: &str = &args[0];
 
     let src = input::read_file(filename);
-    println!["{}", src];
 
     let mut lexer = lex::Lexer::new(src);
     lexer.tokenize();
     let tokens = lexer.get_tokens();
-    println!("Getting tokens done!");
+    eprintln!("Getting tokens done!");
     // for token in tokens {
-    //     println!("{:?}, {}", token, lexer.token_source(token));
+    //     eprintln!("{:?}, {}", token, lexer.token_source(token));
     // }
     let mut parser = parse::Parser::new(tokens);
     let nodes = parser.parse();
-    println!("-------------- generate HTML! ---------------");
+    eprintln!("-------------- generate HTML! ---------------");
     let html = render::render(nodes);
     println!("{}", html);
 }
