@@ -28,8 +28,9 @@ impl HTMLElement {
         self.children.push(child);
     }
     pub fn render(&self, indent: usize) -> String {
+        let indent_unit = "  ";
         let mut html = "".to_string();
-        html.push_str(&" ".repeat(indent));
+        html.push_str(&indent_unit.repeat(indent));
         html.push('<');
         html.push_str(&self.name);
         for (name, value) in &self.attrs {
@@ -41,20 +42,25 @@ impl HTMLElement {
             html.push_str(&value);
             html.push('"');
         }
-        html.push_str(">\n");
+        html.push('>');
+        //
+        if self.children.len() > 0 || self.attrs.len() > 0 {
+            html.push('\n');
+        }
         match &self.name[0..] {
             "area" | "base" | "br" | "col" | "embed" | "hr" | "img" | "input" | "link" | "meta"
             | "param" | "source" | "track" | "wbr" => {
                 // No need close tag
+                html.push('\n');
             }
             _ => {
                 for child in &self.children {
                     let str = match child {
                         Node::Element(e) => {
-                            html.push_str(&e.render(indent + 2)[0..]);
+                            html.push_str(&e.render(indent + 1)[0..]);
                         }
                         Node::Text(body) => {
-                            html.push_str(&" ".repeat(indent));
+                            html.push_str(&indent_unit.repeat(indent + 1));
                             html.push_str(&body[0..]);
                             html.push('\n');
                         }
@@ -63,7 +69,7 @@ impl HTMLElement {
                 }
 
                 // Close tag
-                html.push_str(&" ".repeat(indent));
+                html.push_str(&indent_unit.repeat(indent));
                 html.push_str("</");
                 html.push_str(&self.name);
                 html.push_str(">\n");
