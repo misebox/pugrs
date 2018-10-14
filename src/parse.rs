@@ -44,7 +44,7 @@ impl HTMLElement {
         }
         html.push('>');
         //
-        if self.children.len() > 0 || self.attrs.len() > 0 {
+        if self.children.len() > 0 {
             html.push('\n');
         }
         match &self.name[0..] {
