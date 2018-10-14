@@ -2,6 +2,7 @@ use std::fmt;
 
 #[derive(Clone)]
 pub enum TokenType {
+    Doctype(String),
     NewLine,
     Tag(String),
     Id(String),
@@ -16,6 +17,7 @@ pub enum TokenType {
 impl fmt::Display for TokenType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            TokenType::Doctype(name) => write!(f, "Doctype({})", name),
             TokenType::NewLine => write!(f, "NewLine"),
             TokenType::Tag(name) => write!(f, "Tag({})", name),
             TokenType::Id(name) => write!(f, "Id({})", name),
@@ -106,6 +108,17 @@ impl Lexer {
             None
         }
     }
+    fn consume_line(&mut self, p: &mut Peekable<Chars>) -> Option<String> {
+        match self.consume_while(p, Box::new(|c| -> bool { c != '\n' })) {
+            Some(mut s) => {
+                if p.peek().is_some() {
+                    s.push(self.consume_next(p));
+                }
+                Some(s)
+            }
+            None => None,
+        }
+    }
     fn consume_whitespaces(&mut self, p: &mut Peekable<Chars>) -> Option<String> {
         self.consume_while(p, Box::new(|c| -> bool { c.is_ascii_whitespace() }))
     }
@@ -133,6 +146,13 @@ impl Lexer {
         let tmp = self.src.clone();
         let mut c_iter = tmp.chars().peekable();
         let mut indents = vec![0_usize];
+
+        let first_line: String = tmp.chars().take_while(|&x| -> bool { x != '\n' }).collect();
+        if first_line.starts_with("doctype html") {
+            self.consume_line(&mut c_iter);
+            self.add_token(TokenType::Doctype("html".to_string()), 0, first_line.len());
+        }
+
         'outer: loop {
             let ch = match c_iter.peek() {
                 None => {
@@ -305,5 +325,45 @@ impl Lexer {
                 }
             };
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn tokenize_one(src: &str) -> Token {
+        let mut lex = Lexer::new(src.to_string());
+        lex.tokenize();
+        let tokens = lex.get_tokens();
+        assert_eq!(tokens.len(), 1);
+        tokens[0].clone()
+    }
+
+    #[test]
+    fn lexer_works_html() {
+        let src = "html";
+        let token = tokenize_one(src);
+        let _name = "html".to_string();
+        assert!(if let TokenType::Tag(_name) = token.ty {
+            true
+        } else {
+            false
+        });
+        assert_eq!(token.start, 0);
+        assert_eq!(token.end, 4);
+    }
+    #[test]
+    fn lexer_works_doctype() {
+        let src = "doctype html";
+        let token = tokenize_one(src);
+        let _name = "html".to_string();
+        assert!(if let TokenType::Doctype(_name) = token.ty {
+            true
+        } else {
+            false
+        });
+        assert_eq!(token.start, 0);
+        assert_eq!(token.end, 12);
     }
 }
