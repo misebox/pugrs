@@ -1,4 +1,5 @@
 use lex::{Token, TokenType};
+use log::debug;
 
 pub enum Node {
     Empty,
@@ -107,10 +108,10 @@ impl Parser {
         if self.tokens.len() > self.index {
             let token = self.tokens[self.index].clone();
             self.index += 1;
-            eprintln!("{}- {:?}, ", " ".repeat(self.nest), &token);
+            debug!("{}- {:?}, ", " ".repeat(self.nest), &token);
             Some(token)
         } else {
-            eprintln!("end of tokens");
+            debug!("end of tokens");
             None
         }
     }
@@ -151,17 +152,17 @@ impl Parser {
                     TokenType::Indent => {
                         self.next();
                         self.nest += 1;
-                        eprintln!("start parse children {}", self.nest);
+                        debug!("start parse children {}", self.nest);
                         element.children.extend(self.parse());
-                        eprintln!("end parse children {}", self.nest);
+                        debug!("end parse children {}", self.nest);
                         self.nest -= 1;
                     }
                     TokenType::Colon => {
                         self.next();
                         self.nest += 1;
-                        eprintln!("start parse child {}", self.nest);
+                        debug!("start parse child {}", self.nest);
                         element.push_child(self.parse_one());
-                        eprintln!("end parse child {}", self.nest);
+                        debug!("end parse child {}", self.nest);
                         self.nest -= 1;
                     }
                     TokenType::Outdent | TokenType::Slash => {
@@ -194,7 +195,7 @@ impl Parser {
                     Node::Element(Box::new(element))
                 }
                 tt => {
-                    eprintln!("Parse Error {}", tt);
+                    debug!("Parse Error {}", tt);
                     return Node::Empty;
                 }
             },

@@ -1,5 +1,8 @@
 extern crate lazy_static;
 extern crate regex;
+extern crate log;
+
+use log::debug;
 mod input;
 mod lex;
 mod parse;
@@ -19,13 +22,13 @@ fn main() {
     let mut lexer = lex::Lexer::new(src);
     lexer.tokenize();
     let tokens = lexer.get_tokens();
-    eprintln!("Getting tokens done!");
+    debug!("Getting tokens done!");
     // for token in tokens {
     //     eprintln!("{:?}, {}", token, lexer.token_source(token));
     // }
     let mut parser = parse::Parser::new(tokens);
     let nodes = parser.parse();
-    eprintln!("-------------- generate HTML! ---------------");
+    debug!("-------------- generate HTML! ---------------");
     let html = render::render(nodes);
     println!("{}", html);
 }
