@@ -1,5 +1,4 @@
 use lex::{Token, TokenType};
-use log::debug;
 
 pub enum Node {
     Empty,

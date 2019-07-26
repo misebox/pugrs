@@ -1,12 +1,22 @@
 extern crate lazy_static;
 extern crate regex;
-extern crate log;
+#[macro_use] extern crate log;  // for dbg
 
-use log::debug;
 mod input;
 mod lex;
 mod parse;
 mod render;
+
+
+#[cfg(debug_assertions)]
+macro_rules! debug {
+    ( $($x:expr), +) => { dbg!( $($x), + ) }
+}
+
+#[cfg(not(debug_assertions))]
+macro_rules! debug {
+    ( $($x:expr), +) => { std::convert::identity( $($x), + ) }
+}
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();

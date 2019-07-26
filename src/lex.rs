@@ -1,7 +1,6 @@
 use std::fmt;
-use log::debug;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum TokenType {
     Doctype(String),
     NewLine,
@@ -149,9 +148,30 @@ impl Lexer {
         let mut indents = vec![0_usize];
 
         let first_line: String = tmp.chars().take_while(|&x| -> bool { x != '\n' }).collect();
-        if first_line.starts_with("doctype html") {
-            self.consume_line(&mut c_iter);
-            self.add_token(TokenType::Doctype("html".to_string()), 0, first_line.len());
+        debug!("{}", &first_line);
+        if first_line.starts_with("doctype") {
+            debug!("doctype!");
+            if first_line.len() == 7 {
+                debug!("doctype only");
+                self.add_token(TokenType::Doctype("html".to_string()), 0, 7);
+                self.consume_line(&mut c_iter);
+            } else if first_line.len() > 7 && first_line.chars().nth(7).unwrap() == ' ' {
+                self.consume_name(&mut c_iter);
+                let spaces = self.consume_whitespaces(&mut c_iter).unwrap();
+                let arg = self.consume_name(&mut c_iter).unwrap();
+                let doctype_len = 7 + spaces.len() + arg.len();
+                debug!("doctype: [{}] [{}] len [{}]", &spaces, &arg, &doctype_len);
+                match arg.as_str() {
+                    "html" | "xml"
+                    | "transitional" | "strict"
+                    | "frameset" | "1.1"
+                    | "basic" | "mobile" | "plist"
+                    => self.add_token(TokenType::Doctype(arg), 0, doctype_len),
+                    _ => self.add_token(TokenType::Doctype("html".to_string()), 0, doctype_len),
+                }
+            } else {
+                debug!("Not a doctype <{}, {}, {}>", &first_line, 0, first_line.len());
+            }
         }
 
         'outer: loop {
